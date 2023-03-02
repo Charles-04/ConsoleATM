@@ -13,19 +13,27 @@ namespace ATM.BLL.Services
     internal class Transactions : ITransactions
     {
         private readonly DbService _dbService;
-        public Transactions(DbService dbService)
+        private readonly AccountService _accountService;
+        const int airtimeLimit = 100;
+        public Transactions(DbService dbService,AccountService accountService)
         {
             _dbService = dbService  ;
+            _accountService = accountService;
         }
 
 
-        public async Task<bool> BuyAirtime(Account user,long beneficiary,decimal amount)
+        public async Task<bool> BuyAirtimeAsync(Account account,long beneficiary,decimal amount)
         {
-            if (user.isLoggedIn && amount >=100 && amount < user.AccountBalance)
+            var user = await _accountService.GetUserAsync(account.AccountNumber);
+            if (account.isLoggedIn && amount >= airtimeLimit && amount < user.AccountBalance)
             {
                 try
                 {
-                    SqlConnection sqlConnection = await _dbService.OpenConnection();
+
+                    var bal = user.AccountBalance - amount;
+                    
+                    SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
+                    string commandString = $"UPDATE AccountUser SET balance = {bal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
 
                     return true;
                 }
@@ -41,9 +49,17 @@ namespace ATM.BLL.Services
             }
         }
 
-        public Task<long> CheckBalance()
+        public Task<long> CheckBalance(Account account)
         {
-            throw new NotImplementedException();
+            try
+            {
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
         public Task<bool> Transfer()

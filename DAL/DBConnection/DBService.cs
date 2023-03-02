@@ -24,14 +24,14 @@ namespace ATM.DAL.DBConnection
         _connString = connString;
     }
 
-    public async Task< SqlConnection> OpenConnection()
+    public async Task< SqlConnection> OpenConnectionAsync()
     {
         _dbConnection = new SqlConnection(_connString);
         await _dbConnection.OpenAsync();
         return _dbConnection;
     }
 
-    public async Task CloseConnection()
+    public async Task CloseConnectionAsync()
     {
         if (_dbConnection?.State != ConnectionState.Closed)
         {

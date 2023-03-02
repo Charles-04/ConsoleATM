@@ -10,10 +10,12 @@ namespace ATM.DAL.Models
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public long AccountNumber { get; set; }
         public decimal AccountBalance { get; set; }
         public string Pin { get; set; }
         public bool isActive { get; set; }
         public bool isLoggedIn { get; set; }
+
     }
    
 }

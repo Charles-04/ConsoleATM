@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace ATM.DAL.Models
 {
-    internal class Transaction
+    public class Transaction
     {
         public int Id { get; set; }
         public TransactionType Type { get; set; }
         public Account Receiver { get; set; }
+        public Account Sender { get; set; }
         public decimal Amount { get; set; }
         public decimal Balance { get; set; }
     }

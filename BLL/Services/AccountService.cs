@@ -19,9 +19,9 @@ namespace ATM.BLL.Services
             _dbService = dbService ;
         }
         
-        public async Task<Account> GetUser(long accountNumber)
+        public async Task<Account> GetUserAsync(long accountNumber)
         {
-            SqlConnection sqlConnection = await _dbService.OpenConnection();
+            SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
 
             string UserInfo = $"SELECT * FROM Users WHERE acccountNumber = @AccountNo";
             await using SqlCommand command = new SqlCommand(UserInfo, sqlConnection);
@@ -46,6 +46,7 @@ namespace ATM.BLL.Services
                     user.isActive = (bool)dataReader["isActive"];
                     user.Name = (string)dataReader["userName"];
                     user.Pin = (string)dataReader["pin"];
+                    user.AccountNumber = (long)dataReader[""];
                 }
             }
             return user;
@@ -53,9 +54,11 @@ namespace ATM.BLL.Services
            
         }
 
-        public async Task<Account> LogIn(long accountNumber, string pin)
+
+
+        public async Task<Account> LogInAsync(long accountNumber, string pin)
         {
-            var user = await GetUser(accountNumber);
+            var user = await GetUserAsync(accountNumber);
             if (user.Pin == pin)
             {
                 user.isLoggedIn = true;
@@ -70,9 +73,9 @@ namespace ATM.BLL.Services
             }
         }
 
-        public async Task<bool> LogOut(long accountNumber)
+        public async Task<bool> LogOutAsync(long accountNumber)
         {
-            var user = await GetUser(accountNumber);
+            var user = await GetUserAsync(accountNumber);
             if (user.Name != null)
             {
                 return true;

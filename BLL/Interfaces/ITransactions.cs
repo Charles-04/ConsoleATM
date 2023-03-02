@@ -11,7 +11,7 @@ namespace ATM.BLL.Interfaces
     {
       
         Task<bool> Transfer();
-        Task<bool> BuyAirtime(Account user, long beneficiary, decimal amount);
+        Task<bool> BuyAirtimeAsync(Account user, long beneficiary, decimal amount);
         Task<bool> CheckBalance();
         Task<bool> Withdraw();
     }

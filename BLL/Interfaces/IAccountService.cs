@@ -10,9 +10,9 @@ namespace ATM.BLL.Interfaces
     public interface IAccountService
     {
 
-        Task<Account> LogIn(long accountNumber, string pin);
-        Task<bool> LogOut(long accountNumber);
-        Task<Account> GetUser(long accountNumber);
+        Task<Account> LogInAsync(long accountNumber, string pin);
+        Task<bool> LogOutAsync(long accountNumber);
+        Task<Account> GetUserAsync(long accountNumber);
 
     }
 }
