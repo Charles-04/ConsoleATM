@@ -2,6 +2,7 @@
 using ATM.DAL.DBConnection;
 using ATM.DAL.Models;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace ATM.BLL.Services
 {
@@ -9,7 +10,7 @@ namespace ATM.BLL.Services
     {
         private readonly DbService _dbService;
         private readonly AccountService _accountService;
-        const int airtimeLimit = 100;
+        private const int airtimeLimit = 100;
         public Transactions(DbService dbService, AccountService accountService)
         {
             _dbService = dbService;
@@ -59,14 +60,73 @@ namespace ATM.BLL.Services
             }
         }
 
-        public Task<bool> Transfer()
+        public async Task<bool> Transfer(Account account, long recepientAccNo, decimal amount)
         {
-            throw new NotImplementedException();
+
+            var user = await _accountService.GetUserAsync(account.AccountNumber);
+            var recepient = await _accountService.GetUserAsync(recepientAccNo);
+            if (account.isLoggedIn && amount > 0  && amount < user.AccountBalance && ! string.IsNullOrEmpty( recepient.Name))
+            {
+                try
+                {
+
+                    var userBal = user.AccountBalance - amount;
+                    var recepientBal = recepient.AccountBalance + amount;
+
+                    SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
+                    string commandString = $"UPDATE AccountUser SET balance = {userBal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
+                    commandString += $";UPDATE AccountUser SET balance = {recepientBal} WHERE AccountUser.accountNumber = {recepient.AccountNumber}";
+                    
+                    return true;
+                }
+                catch (Exception)
+                {
+
+                    return false;
+                }
+            }
+            else if(amount <= 0)
+            {
+                Console.WriteLine($"Amouunt {amount} is lower than zero");
+                return false;
+            }
+            else
+            {
+                Console.WriteLine($"Transfer failed try again");
+                return false;
+            }
         }
 
-        public Task<bool> Withdraw()
+        public async Task<bool> Withdraw(Account account, decimal amount)
         {
-            throw new NotImplementedException();
+            var user = await _accountService.GetUserAsync(account.AccountNumber);
+            if (account.isLoggedIn && amount >= airtimeLimit && amount < user.AccountBalance)
+            {
+                try
+                {
+
+                    var bal = user.AccountBalance - amount;
+
+                    SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
+                    string commandString = $"UPDATE AccountUser SET balance = {bal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
+                    await using SqlCommand command = new SqlCommand(commandString, sqlConnection);
+                    command.CommandType = CommandType.Text;
+
+                   var result = await command.ExecuteNonQueryAsync();
+                    if (result != 0) { }
+
+                return true;
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
