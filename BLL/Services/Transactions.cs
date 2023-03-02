@@ -49,18 +49,18 @@ namespace ATM.BLL.Services
             }
         }
 
-        public Task<long> CheckBalance(Account account)
+     /*   public Task<long> CheckBalance(Account account)
         {
             try
             {
-
+                
             }
             catch (Exception)
             {
 
                 throw;
             }
-        }
+        }*/
 
         public Task<bool> Transfer()
         {

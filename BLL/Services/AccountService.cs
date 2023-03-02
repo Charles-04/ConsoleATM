@@ -23,7 +23,7 @@ namespace ATM.BLL.Services
         {
             SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
 
-            string UserInfo = $"SELECT * FROM Users WHERE acccountNumber = @AccountNo";
+            string UserInfo = $"SELECT * FROM AccountUser WHERE accountNumber = @AccountNo";
             await using SqlCommand command = new SqlCommand(UserInfo, sqlConnection);
             command.Parameters.AddRange(new SqlParameter[]
             {
@@ -43,10 +43,10 @@ namespace ATM.BLL.Services
                 {
                     user.AccountBalance = (decimal)dataReader["accountBalance"];
                     user.Id = (Guid)dataReader["userId"];
-                    user.isActive = (bool)dataReader["isActive"];
+                    //user.isActive = (bool)dataReader["isActive"];
                     user.Name = (string)dataReader["userName"];
                     user.Pin = (string)dataReader["pin"];
-                    user.AccountNumber = (long)dataReader[""];
+                    user.AccountNumber = (long)dataReader["accountNumber"];
                 }
             }
             return user;

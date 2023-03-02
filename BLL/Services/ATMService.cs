@@ -17,7 +17,7 @@ namespace ATM.BLL.Services
         {
                 _dbService= dbService;
         }
-        public async Task<bool> UpdateTransactionAsync(Transaction transaction)
+        public async Task<bool> CreateTransactionAsync(Transaction transaction)
 
         {
             try
@@ -30,7 +30,7 @@ namespace ATM.BLL.Services
                 new SqlParameter
                 {
                     ParameterName = "@sender",
-                    Value = transaction.Receiver.AccountNumber,
+                    Value = transaction.Receiver.Id,
                     SqlDbType = SqlDbType.UniqueIdentifier,
                     Direction = ParameterDirection.Input,
                     Size = 50
@@ -38,8 +38,8 @@ namespace ATM.BLL.Services
                 new SqlParameter
                 {
                     ParameterName = "@receiver",
-                    Value = transaction.Receiver.AccountNumber,
-                    SqlDbType = SqlDbType.BigInt,
+                    Value = transaction.Receiver.Id,
+                    SqlDbType =  SqlDbType.UniqueIdentifier,
                     Direction = ParameterDirection.Input,
                     Size = 50
                 },
@@ -67,14 +67,15 @@ namespace ATM.BLL.Services
                     Size = 50
                 }
                 });
-
+                return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
-                throw;
+                Console.WriteLine(ex.Message);
+                return false;
             }
-            return true;
+           
         }
     }
 }
