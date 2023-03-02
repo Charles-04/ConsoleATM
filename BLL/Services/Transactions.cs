@@ -2,11 +2,6 @@
 using ATM.DAL.DBConnection;
 using ATM.DAL.Models;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ATM.BLL.Services
 {
@@ -15,14 +10,14 @@ namespace ATM.BLL.Services
         private readonly DbService _dbService;
         private readonly AccountService _accountService;
         const int airtimeLimit = 100;
-        public Transactions(DbService dbService,AccountService accountService)
+        public Transactions(DbService dbService, AccountService accountService)
         {
-            _dbService = dbService  ;
+            _dbService = dbService;
             _accountService = accountService;
         }
 
 
-        public async Task<bool> BuyAirtimeAsync(Account account,long beneficiary,decimal amount)
+        public async Task<bool> BuyAirtimeAsync(Account account, long beneficiary, decimal amount)
         {
             var user = await _accountService.GetUserAsync(account.AccountNumber);
             if (account.isLoggedIn && amount >= airtimeLimit && amount < user.AccountBalance)
@@ -31,7 +26,7 @@ namespace ATM.BLL.Services
                 {
 
                     var bal = user.AccountBalance - amount;
-                    
+
                     SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
                     string commandString = $"UPDATE AccountUser SET balance = {bal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
 
@@ -49,18 +44,20 @@ namespace ATM.BLL.Services
             }
         }
 
-     /*   public Task<long> CheckBalance(Account account)
+        public async Task CheckBalance(Account account)
         {
+           
             try
             {
-                
+                var user = await _accountService.GetUserAsync(account.AccountNumber);
+                Console.WriteLine($"Your Account Balance is {user.AccountBalance}");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
-                throw;
+                Console.WriteLine(ex.Message);
             }
-        }*/
+        }
 
         public Task<bool> Transfer()
         {
