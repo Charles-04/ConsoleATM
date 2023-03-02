@@ -30,13 +30,17 @@ namespace ATM.BLL.Services
 
                     SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
                     string commandString = $"UPDATE AccountUser SET balance = {bal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
+                    await using SqlCommand command = new SqlCommand(commandString, sqlConnection);
+                    command.CommandType = CommandType.Text;
 
+                    var result = await command.ExecuteNonQueryAsync();
                     return true;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
 
-                    throw;
+                    Console.WriteLine(ex.Message);
+                    return false;
                 }
             }
             else
@@ -76,18 +80,22 @@ namespace ATM.BLL.Services
                     SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
                     string commandString = $"UPDATE AccountUser SET balance = {userBal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
                     commandString += $";UPDATE AccountUser SET balance = {recepientBal} WHERE AccountUser.accountNumber = {recepient.AccountNumber}";
-                    
+                    await using SqlCommand command = new SqlCommand(commandString, sqlConnection);
+                    command.CommandType = CommandType.Text;
+
+                    var result = await command.ExecuteNonQueryAsync();
+
                     return true;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-
+                    Console.WriteLine(ex.Message);
                     return false;
                 }
             }
             else if(amount <= 0)
             {
-                Console.WriteLine($"Amouunt {amount} is lower than zero");
+                Console.WriteLine($"Amount {amount} is lower than zero");
                 return false;
             }
             else
@@ -112,10 +120,58 @@ namespace ATM.BLL.Services
                     await using SqlCommand command = new SqlCommand(commandString, sqlConnection);
                     command.CommandType = CommandType.Text;
 
-                   var result = await command.ExecuteNonQueryAsync();
-                    if (result != 0) { }
+                    var result = await command.ExecuteNonQueryAsync();
+                    if (result != 0) {
+                        Console.WriteLine("Withdrawal Successful");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Withdrawal Failed");
+                    }
 
                 return true;
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
+
+
+        public async Task<bool> Deposit(Account account, decimal amount)
+        {
+            var user = await _accountService.GetUserAsync(account.AccountNumber);
+            if (account.isLoggedIn && amount >= 0 && amount < user.AccountBalance)
+            {
+                try
+                {
+
+                    var bal = user.AccountBalance + amount;
+
+                    SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
+                    string commandString = $"UPDATE AccountUser SET balance = {bal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
+                    await using SqlCommand command = new SqlCommand(commandString, sqlConnection);
+                    command.CommandType = CommandType.Text;
+
+                    var result = await command.ExecuteNonQueryAsync();
+                    if (result != 0)
+                    {
+                        Console.WriteLine("Deposit Successful");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Deposit Failed");
+                    }
+
+                    return true;
                 }
                 catch (Exception)
                 {
