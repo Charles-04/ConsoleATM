@@ -10,10 +10,10 @@ namespace ATM.BLL.Interfaces
     internal interface ITransactions
     {
       
-        Task<bool> Transfer(Account account, long recepientAccNo, decimal amount);
-        Task<bool> BuyAirtimeAsync(Account user, long beneficiary, decimal amount);
-        Task CheckBalance(Account account);
-        Task<bool> Withdraw(Account account,decimal amount);
+        Task<Transaction> TransferAsync(Account account, long recepientAccNo, decimal amount);
+        Task<Transaction> BuyAirtimeAsync(Account user, long beneficiary, decimal amount);
+        Task CheckBalanceAsync(Account account);
+        Task<Transaction> WithdrawAsync(Account account,decimal amount);
     }
     public enum TransactionType
     {

@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace ATM.BLL.Services
 {
-    public class ATMService
+    internal  class ATMService
     {
         private DbService _dbService;
-        private ATMService(DbService dbService)
+        public ATMService(DbService dbService)
         {
-                _dbService= dbService;
+                _dbService = dbService;
         }
         public async Task<bool> CreateTransactionAsync(Transaction transaction)
 
@@ -30,7 +30,7 @@ namespace ATM.BLL.Services
                 new SqlParameter
                 {
                     ParameterName = "@sender",
-                    Value = transaction.Receiver.Id,
+                    Value = transaction.Sender,
                     SqlDbType = SqlDbType.UniqueIdentifier,
                     Direction = ParameterDirection.Input,
                     Size = 50
@@ -38,35 +38,37 @@ namespace ATM.BLL.Services
                 new SqlParameter
                 {
                     ParameterName = "@receiver",
-                    Value = transaction.Receiver.Id,
+                    Value = transaction.Receiver,
                     SqlDbType =  SqlDbType.UniqueIdentifier,
                     Direction = ParameterDirection.Input,
                     Size = 50
                 },
                     new SqlParameter
                 {
-                    ParameterName = "@AccountNo",
-                    Value = transaction.Receiver.AccountNumber,
+                    ParameterName = "@amount",
+                    Value = transaction.Amount,
                     SqlDbType = SqlDbType.BigInt,
                     Direction = ParameterDirection.Input,
                     Size = 50
                 },
                     new SqlParameter
                 {
-                    ParameterName = "@AccountNo",
-                    Value = transaction.Receiver.AccountNumber,
+                    ParameterName = "@balance",
+                    Value = transaction.Balance,
                     SqlDbType = SqlDbType.BigInt,
                     Direction = ParameterDirection.Input,
                     Size = 50
                 },new SqlParameter
                 {
-                    ParameterName = "@AccountNo",
-                    Value = transaction.Receiver.AccountNumber,
-                    SqlDbType = SqlDbType.BigInt,
+                    ParameterName = "@remark",
+                    Value = transaction.Remarks,
+                    SqlDbType = SqlDbType.NVarChar,
                     Direction = ParameterDirection.Input,
                     Size = 50
                 }
                 });
+                command.CommandType = CommandType.Text;
+                await command.ExecuteNonQueryAsync();
                 return true;
             }
             catch (Exception ex)

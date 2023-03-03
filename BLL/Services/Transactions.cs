@@ -10,6 +10,7 @@ namespace ATM.BLL.Services
     {
         private readonly DbService _dbService;
         private readonly AccountService _accountService;
+        private Transaction _transaction = new();
         private const int airtimeLimit = 100;
         public Transactions(DbService dbService, AccountService accountService)
         {
@@ -18,7 +19,7 @@ namespace ATM.BLL.Services
         }
 
 
-        public async Task<bool> BuyAirtimeAsync(Account account, long beneficiary, decimal amount)
+        public async Task<Transaction> BuyAirtimeAsync(Account account, long beneficiary, decimal amount)
         {
             var user = await _accountService.GetUserAsync(account.AccountNumber);
             if (account.isLoggedIn && amount >= airtimeLimit && amount < user.AccountBalance)
@@ -34,22 +35,27 @@ namespace ATM.BLL.Services
                     command.CommandType = CommandType.Text;
 
                     var result = await command.ExecuteNonQueryAsync();
-                    return true;
+                    _transaction.Sender = user.Id;
+                    _transaction.Balance = bal;
+                    _transaction.Type = TransactionType.Debit;
+
+                    return _transaction;
+                  
                 }
                 catch (Exception ex)
                 {
 
                     Console.WriteLine(ex.Message);
-                    return false;
+                    return null;
                 }
             }
             else
             {
-                return false;
+                return null;
             }
         }
 
-        public async Task CheckBalance(Account account)
+        public async Task CheckBalanceAsync(Account account)
         {
            
             try
@@ -64,7 +70,7 @@ namespace ATM.BLL.Services
             }
         }
 
-        public async Task<bool> Transfer(Account account, long recepientAccNo, decimal amount)
+        public async Task<Transaction> TransferAsync(Account account, long recepientAccNo, decimal amount)
         {
 
             var user = await _accountService.GetUserAsync(account.AccountNumber);
@@ -78,37 +84,42 @@ namespace ATM.BLL.Services
                     var recepientBal = recepient.AccountBalance + amount;
 
                     SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
-                    string commandString = $"UPDATE AccountUser SET balance = {userBal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
-                    commandString += $";UPDATE AccountUser SET balance = {recepientBal} WHERE AccountUser.accountNumber = {recepient.AccountNumber}";
+                    string commandString = $"UPDATE AccountUser SET accountBalance = {userBal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
+                    commandString += $";UPDATE AccountUser SET accountBalance = {recepientBal} WHERE AccountUser.accountNumber = {recepient.AccountNumber}";
                     await using SqlCommand command = new SqlCommand(commandString, sqlConnection);
                     command.CommandType = CommandType.Text;
 
                     var result = await command.ExecuteNonQueryAsync();
 
-                    return true;
+                    _transaction.Sender = user.Id;
+                    _transaction.Receiver = recepient.Id;
+                    _transaction.Balance = userBal;
+                    _transaction.Type = TransactionType.Debit;
+                    
+                    return _transaction;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    return false;
+                    return null;
                 }
             }
             else if(amount <= 0)
             {
                 Console.WriteLine($"Amount {amount} is lower than zero");
-                return false;
+                return null;
             }
             else
             {
                 Console.WriteLine($"Transfer failed try again");
-                return false;
+                return null;
             }
         }
 
-        public async Task<bool> Withdraw(Account account, decimal amount)
+        public async Task<Transaction> WithdrawAsync(Account account, decimal amount)
         {
             var user = await _accountService.GetUserAsync(account.AccountNumber);
-            if (account.isLoggedIn && amount >= airtimeLimit && amount < user.AccountBalance)
+            if (account.isLoggedIn && amount >= 0 && amount < user.AccountBalance)
             {
                 try
                 {
@@ -116,37 +127,46 @@ namespace ATM.BLL.Services
                     var bal = user.AccountBalance - amount;
 
                     SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
-                    string commandString = $"UPDATE AccountUser SET balance = {bal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
+                    string commandString = $"UPDATE AccountUser SET accountBalance = {bal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
                     await using SqlCommand command = new SqlCommand(commandString, sqlConnection);
                     command.CommandType = CommandType.Text;
 
                     var result = await command.ExecuteNonQueryAsync();
                     if (result != 0) {
                         Console.WriteLine("Withdrawal Successful");
+                        _transaction.Sender = user.Id;
+                        _transaction.Balance = bal;
+                        _transaction.Type = TransactionType.Debit;
+                        _transaction.Remarks = $"Withdrew {amount}";
+
+                        return _transaction;
                     }
                     else
                     {
                         Console.WriteLine("Withdrawal Failed");
+                        return null;
                     }
 
-                return true;
-                }
-                catch (Exception)
-                {
 
-                    throw;
+               
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine (ex.Message);
+                    return null;
                 }
             }
             else
             {
-                return false;
+                Console.WriteLine("Insufficient Funds");
+                return null;
             }
         }
 
 
 
 
-        public async Task<bool> Deposit(Account account, decimal amount)
+        public async Task<Transaction> Deposit(Account account, decimal amount)
         {
             var user = await _accountService.GetUserAsync(account.AccountNumber);
             if (account.isLoggedIn && amount >= 0 && amount < user.AccountBalance)
@@ -157,7 +177,7 @@ namespace ATM.BLL.Services
                     var bal = user.AccountBalance + amount;
 
                     SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
-                    string commandString = $"UPDATE AccountUser SET balance = {bal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
+                    string commandString = $"UPDATE AccountUser SET accountBalance = {bal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
                     await using SqlCommand command = new SqlCommand(commandString, sqlConnection);
                     command.CommandType = CommandType.Text;
 
@@ -165,23 +185,31 @@ namespace ATM.BLL.Services
                     if (result != 0)
                     {
                         Console.WriteLine("Deposit Successful");
+                        _transaction.Sender = user.Id;
+                        _transaction.Balance = bal;
+                        _transaction.Type = TransactionType.Credit;
+                        _transaction.Remarks = $"Withdrew {amount}";
+
+                        return _transaction;
                     }
                     else
                     {
                         Console.WriteLine("Deposit Failed");
+                        return null;
                     }
 
-                    return true;
+                   
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-
-                    throw;
+                    Console.WriteLine(ex.Message);
+                    return null;
+                   
                 }
             }
             else
             {
-                return false;
+                return null;
             }
         }
     }

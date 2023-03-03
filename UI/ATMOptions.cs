@@ -13,6 +13,7 @@ namespace ATM.UI
         private AccountService _accountService;
         private Account currentAccount;
         private const int DelayTime = 3000;
+        private UILogic _uILogic = new();
 
         public ATMOptions(AccountService accountService) {
             _accountService= accountService;
@@ -32,7 +33,7 @@ namespace ATM.UI
                 {
                     Console.WriteLine($"Welcome {currentAccount.Name} \n");
 
-                    OperationOptions();
+                    await OperationOptions();
                 } 
             else
             {
@@ -43,45 +44,57 @@ namespace ATM.UI
                 await Validate();
             }
         }
-        internal void OperationOptions()
+        public async Task OperationOptions()
         {
-            Console.WriteLine("Choose banking operation \n\n1 : Withdrawal \n2 : Transfers \n3 : Balance Check \n4 : exit  \n0 : Previous Menu");
-            int.TryParse((Console.ReadLine()), out int Option);
-
-            switch (Option)
+           ATMOptions: try
             {
-                case 0:
-                    Console.Clear();
-                   // Atm.Init();
-                    break;
-
-                case 1:
-                    Console.Clear();
-                   // Withdraw();
 
 
-                    break;
+                Console.WriteLine("Choose banking operation \n\n1 : Withdrawal \n2 : Transfers \n3 : Balance Check \n4 : exit  \n0 : Previous Menu");
+                int.TryParse((Console.ReadLine()), out int Option);
 
-                case 2:
-                    Console.Clear();
-                    //Transfer();
-                    break;
+                switch (Option)
+                {
+                    case 0:
+                        Console.Clear();
+                        // Atm.Init();
+                        break;
 
-                case 3:
-                    Console.Clear();
-                    //GetBalance();
-                    break;
-                case 4:
-                    Console.WriteLine("Thanks For Using our services");
-                    return;
+                    case 1:
+                        Console.Clear();
 
-                default:
-                    Console.WriteLine("Incorrect Option");
-                    Task.Delay(DelayTime).Wait();
-                    Console.Clear();
-                    OperationOptions();
-                    break;
+                        await _uILogic.WithdrawAsync(currentAccount);
+
+                        goto ATMOptions;
+
+                    case 2:
+                        Console.Clear();
+                        await _uILogic.TransferAsync(currentAccount);
+                        goto ATMOptions;
+
+                    case 3:
+                        Console.Clear();
+                        await _uILogic.CheckBalanceAsync(currentAccount);
+                        goto ATMOptions;
+
+                    case 4:
+                        Console.WriteLine("Thanks For Using our services");
+                        return;
+
+                    default:
+                        Console.WriteLine("Incorrect Option");
+                        Task.Delay(DelayTime).Wait();
+                        Console.Clear();
+                        await OperationOptions();
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+            }
             }
         }
     }
-}
+
