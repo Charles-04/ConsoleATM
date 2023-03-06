@@ -69,6 +69,7 @@ namespace ATM.BLL.Services
             {
                 user.isLoggedIn = false;
                 Console.WriteLine("Invalid Credentials");
+                user = null;
                 return user;
             }
         }

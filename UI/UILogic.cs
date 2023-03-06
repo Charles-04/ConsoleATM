@@ -22,8 +22,13 @@ namespace ATM.UI
                 bool isAmountValid = decimal.TryParse((Console.ReadLine()), out decimal amount);
                 if (isAmountValid)
                 {
-                   var isWithdrawn = await _transaction.WithdrawAsync(user, amount);
-                  
+                   var isSuccessful = await _transaction.WithdrawAsync(user, amount);
+                    if (isSuccessful != null)
+                    {
+
+                        await _aTMService.CreateTransactionAsync(isSuccessful);
+                    }
+
                 }
                 else
                 {
@@ -45,7 +50,7 @@ namespace ATM.UI
         }
         public async Task BuyAirtimeAsync(Account user)
         {
-            try
+          BuyAirtimeAsync:  try
             {
                 Console.WriteLine("Buy Airtime \n \n Enter amount \n");
                 bool isAmountValid = decimal.TryParse((Console.ReadLine()), out decimal amount);
@@ -53,11 +58,18 @@ namespace ATM.UI
                 bool isnumberValid = long.TryParse((Console.ReadLine()), out long beneficiary);
                 if (beneficiary.ToString().Length == 11)
                 {
-                    await _transaction.BuyAirtimeAsync(user,beneficiary,amount);
+                    var isSuccessful = await _transaction.BuyAirtimeAsync(user,beneficiary,amount);
+                    if (isSuccessful != null)
+                    {
+                        
+                        await _aTMService.CreateTransactionAsync(isSuccessful);
+                    }
                 }
                 else
                 {
                     Console.WriteLine("Number must be 11 digits");
+                    Task.Delay(3000).Wait();
+                    goto BuyAirtimeAsync;
                 }
 
             }
@@ -66,6 +78,20 @@ namespace ATM.UI
 
                 Console.WriteLine(ex.Message);
             }
+        }
+        public async Task LogOutAsync(Account account)
+        {
+            try
+            {
+                await accountService.LogOutAsync(account.AccountNumber);
+                
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+            }
+            
         }
         public async Task TransferAsync(Account user) {
 
@@ -81,11 +107,11 @@ namespace ATM.UI
                 var remark = Console.ReadLine();
                 if (isAmountValid && isbeneficiaryValid)
                 {
-                    var isTransferred = await _transaction.TransferAsync(user,beneficiary, amount);
-                    if (isTransferred != null)
+                    var isSuccessful = await _transaction.TransferAsync(user,beneficiary, amount);
+                    if (isSuccessful != null)
                     {
-                        isTransferred.Remarks = remark;
-                        await _aTMService.CreateTransactionAsync(isTransferred);
+                        isSuccessful.Remarks = remark;
+                        await _aTMService.CreateTransactionAsync(isSuccessful);
                     }
                 }
                 else

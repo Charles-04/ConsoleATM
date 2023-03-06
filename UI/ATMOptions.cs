@@ -29,7 +29,7 @@ namespace ATM.UI
                 Console.Clear();
                 currentAccount = await _accountService.LogInAsync(accountNumber, pin);
 
-                if (!string.IsNullOrEmpty(currentAccount.Name))
+                if (currentAccount != null)
                 {
                     Console.WriteLine($"Welcome {currentAccount.Name} \n");
 
@@ -57,7 +57,9 @@ namespace ATM.UI
                 {
                     case 0:
                         Console.Clear();
-                        // Atm.Init();
+                        await _uILogic.LogOutAsync(currentAccount);
+                        currentAccount = null;
+                        await Validate();
                         break;
 
                     case 1:

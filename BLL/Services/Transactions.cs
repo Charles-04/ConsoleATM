@@ -98,7 +98,9 @@ namespace ATM.BLL.Services
                     _transaction.Balance = userBal;
                     _transaction.Amount = amount;
                     _transaction.Type = TransactionType.Debit;
-                    
+
+                    Console.WriteLine("Transfer Successful\n");
+
                     return _transaction;
                 }
                 catch (Exception ex)
@@ -141,13 +143,14 @@ namespace ATM.BLL.Services
 
                     var result = await command.ExecuteNonQueryAsync();
                     if (result != 0) {
-                        Console.WriteLine("Withdrawal Successful");
+                        
                         _transaction.Sender = user.Id;
                         _transaction.Balance = bal;
                         _transaction.Type = TransactionType.Debit;
                         _transaction.Remarks = $"Withdrew {amount}";
                         _transaction.Amount = amount;
 
+                        Console.WriteLine("Withdrawal Successful");
                         return _transaction;
                     }
                     else
