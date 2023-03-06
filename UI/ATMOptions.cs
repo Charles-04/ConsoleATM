@@ -20,7 +20,7 @@ namespace ATM.UI
         }
         internal async Task Validate()
         {
-            Console.WriteLine("Enter your account Number");
+            Console.WriteLine("Welcome To Transcend Bank PLC \n \nEnter your account Number");
             var accNumber = long.TryParse(Console.ReadLine(), out long accountNumber);
             Console.WriteLine("Enter your pin");
             var pin = Console.ReadLine();
@@ -50,7 +50,7 @@ namespace ATM.UI
             {
 
 
-                Console.WriteLine("Choose banking operation \n\n1 : Withdrawal \n2 : Transfers \n3 : Balance Check \n4 : exit  \n0 : Previous Menu");
+                Console.WriteLine("Choose banking operation \n\n1 : Withdrawal \n2 : Transfers \n3 : Balance Check \n4 : Buy Airtime \n5 : exit  \n0 : Previous Menu");
                 int.TryParse((Console.ReadLine()), out int Option);
 
                 switch (Option)
@@ -80,6 +80,10 @@ namespace ATM.UI
                         goto ATMOptions;
 
                     case 4:
+                        Console.Clear();
+                        await _uILogic.BuyAirtimeAsync(currentAccount);
+                        goto ATMOptions;
+                    case 5:
                         Console.WriteLine("Thanks For Using our services");
                         return;
 

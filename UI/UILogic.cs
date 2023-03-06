@@ -55,20 +55,23 @@ namespace ATM.UI
                 Console.WriteLine("Buy Airtime \n \n Enter amount \n");
                 bool isAmountValid = decimal.TryParse((Console.ReadLine()), out decimal amount);
                 Console.WriteLine("Enter beneficiary");
-                bool isnumberValid = long.TryParse((Console.ReadLine()), out long beneficiary);
-                if (beneficiary.ToString().Length == 11)
+                var number = (Console.ReadLine());
+                bool isnumberValid = long.TryParse(number, out long beneficiary);
+                if (number.Trim().Length == 11)
                 {
                     var isSuccessful = await _transaction.BuyAirtimeAsync(user,beneficiary,amount);
                     if (isSuccessful != null)
                     {
                         
                         await _aTMService.CreateTransactionAsync(isSuccessful);
+                        Console.WriteLine("Airtime purchase successful");
                     }
                 }
                 else
                 {
                     Console.WriteLine("Number must be 11 digits");
                     Task.Delay(3000).Wait();
+                    Console.Clear();
                     goto BuyAirtimeAsync;
                 }
 

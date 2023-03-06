@@ -30,13 +30,14 @@ namespace ATM.BLL.Services
                     var bal = user.AccountBalance - amount;
 
                     SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
-                    string commandString = $"UPDATE AccountUser SET balance = {bal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
+                    string commandString = $"UPDATE AccountUser SET accountBalance = {bal} WHERE AccountUser.accountNumber = {user.AccountNumber}";
                     await using SqlCommand command = new SqlCommand(commandString, sqlConnection);
                     command.CommandType = CommandType.Text;
 
                     var result = await command.ExecuteNonQueryAsync();
                     _transaction.Sender = user.Id;
                     _transaction.Balance = bal;
+                    _transaction.Receiver = user.Id;
                     _transaction.Type = TransactionType.Debit;
                     _transaction.Remarks = $"You sent {amount} airtime to {beneficiary}";
                     _transaction.Amount = amount;
