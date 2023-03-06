@@ -23,7 +23,7 @@ namespace ATM.BLL.Services
             try
             {
                 SqlConnection sqlConnection = await _dbService.OpenConnectionAsync();
-                string TransactionInfo = $"INSERT into Transactions(currentUser,receiver,amount,balance,remarks) values (@sender,@receiver,@amount,@balance,@remark)";
+                string TransactionInfo = $"INSERT into Transactions(currentUser,receiver,amount,balance,remarks,type) values (@sender,@receiver,@amount,@balance,@remark,@type)";
                 await using SqlCommand command = new SqlCommand(TransactionInfo, sqlConnection);
                 command.Parameters.AddRange(new SqlParameter[]
                 {

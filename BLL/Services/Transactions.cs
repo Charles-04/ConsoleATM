@@ -38,7 +38,8 @@ namespace ATM.BLL.Services
                     _transaction.Sender = user.Id;
                     _transaction.Balance = bal;
                     _transaction.Type = TransactionType.Debit;
-
+                    _transaction.Remarks = $"You sent {amount} airtime to {beneficiary}";
+                    _transaction.Amount = amount;
                     return _transaction;
                   
                 }
@@ -51,6 +52,7 @@ namespace ATM.BLL.Services
             }
             else
             {
+                Console.WriteLine("Invalid Amount");
                 return null;
             }
         }
@@ -94,6 +96,7 @@ namespace ATM.BLL.Services
                     _transaction.Sender = user.Id;
                     _transaction.Receiver = recepient.Id;
                     _transaction.Balance = userBal;
+                    _transaction.Amount = amount;
                     _transaction.Type = TransactionType.Debit;
                     
                     return _transaction;
@@ -107,6 +110,11 @@ namespace ATM.BLL.Services
             else if(amount <= 0)
             {
                 Console.WriteLine($"Amount {amount} is lower than zero");
+                return null;
+            }
+            else if (string.IsNullOrEmpty(recepient.Name))
+            {
+                Console.WriteLine($"beneficiary account doesn't exist");
                 return null;
             }
             else
@@ -138,6 +146,7 @@ namespace ATM.BLL.Services
                         _transaction.Balance = bal;
                         _transaction.Type = TransactionType.Debit;
                         _transaction.Remarks = $"Withdrew {amount}";
+                        _transaction.Amount = amount;
 
                         return _transaction;
                     }
